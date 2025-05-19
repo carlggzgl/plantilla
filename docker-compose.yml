@@ -1,0 +1,46 @@
+services:
+  # Servicio para PostgreSQL
+  db:
+    container_name: Pgsql_proy
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Docker/DB/Dockerfile
+    image: p16:1.0
+    environment:
+      POSTGRES_USER: db_user
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: db_proy
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./DB_DUMP:/docker-entrypoint-initdb.d
+    ports:
+      - "5434:5432"
+    networks:
+      backend:
+  
+  # Servicio para WILDFLY
+  wildfly:
+      build:
+        context: .
+        dockerfile: ./Docker/APP/Dockerfile
+      image: wf29:1.0
+      container_name: Wf_proy
+      ports:
+        - "8081:8080"
+        - "9990:9990"
+        - "8009:8009"
+      networks:
+        - backend
+        - frontend
+      volumes:
+        - ./PROYECTO/target/proyectoBase-1.0.0-STABLE.war:/opt/wildfly/standalone/deployments/proyectoBase-1.0.0-STABLE.war
+     
+      depends_on:
+        - db
+      restart: always
+      
+networks:
+  backend:
+  frontend:
+  
